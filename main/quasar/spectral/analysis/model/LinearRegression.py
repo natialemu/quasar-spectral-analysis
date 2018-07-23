@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
 import random
+from sklearn import preprocessing
 
 
 class LinearRegression:
@@ -8,16 +9,11 @@ class LinearRegression:
     def __init__(self,features, labels,train_ratio=0.75):
         self.featureMatrix = np.array(features)
         self.label = np.array(labels)
-
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.featureMatrix,self.label,train_ratio)
         self.theta = np.array()
         for i in range(len(self.x_train)):
             self.theta[i] = random.random() #random number between 0 and 1
-
-
-
-        #input
-        #oupi
+        self.standarizeData()
 
     def fit(self,gradiet_descent=True):
         if(gradiet_descent):
@@ -28,29 +24,14 @@ class LinearRegression:
     def fit_gradient_descent(self):
         num_iter = 1000
         alpha = 1
-        '''
-        err_vector = np.multiply(np.square(np.add(np.matmul(self.theta,self.x_train),self.y_train)),0.5)
-        d_err_vector = np.add(np.matmul(self.theta,self.x_train),self.y_train) --> derivative
-          for certain number of iterations:
-              theta = theta - alpha*derivativeOfErrorWithRespectTheta 
-                   
-        '''
-        d_err_vector = np.add(np.matmul(self.theta, self.x_train), self.y_train)
+        d_err_vector = np.multiply(np.add(np.matmul(self.theta,self.x_train),self.y_train),self.featureMatrix)
         for i in range(num_iter):
             self.theta = np.subtract(self.theta,np.multiply(alpha,d_err_vector))
-            d_err_vector = np.add(np.matmul(self.theta, self.x_train), self.y_train)
-
-
-
+            d_err_vector = np.multiply(np.add(np.matmul(self.theta,self.x_train),self.y_train),self.featureMatrix)
 
     def h(self,current_x, current_y):
-
-        current_theta = self.theta
-        f_of_theta_current = np.add(np.matmul(self.x_train,self.theta),self.y_train)
-        while not self.converges(f_of_theta_current):
-            #current_theta = current_theta - f_of_theta_current/f'(theta_current)
-
-        #copy current theta into self.theta
+        output_vector = np.matmul(self.theta,self.featureMatrix)
+        return output_vector
 
     def converges(self,f_of_theta):
         threshold=0.5
@@ -71,7 +52,7 @@ class LinearRegression:
         threshold = 0.0001
         err_vector = np.multiply(np.square(np.add(np.matmul(self.theta,self.x_train),self.y_train)),0.5)
         while self.errHasConverged(err_vector,threshold):
-            d_err_vector = np.add(np.matmul(self.theta,self.x_train),self.y_train)
+            d_err_vector = np.multiply(np.add(np.matmul(self.theta,self.x_train),self.y_train),self.featureMatrix)
             self.theta = np.subtract(self.theta,np.multiply(np.linalg.inv(err_vector),d_err_vector))
             err_vector = np.multiply(np.square(np.add(np.matmul(self.theta,self.x_train),self.y_train)),0.5)
 
@@ -81,17 +62,6 @@ class LinearRegression:
                 return False
         return True
 
-    def updateTheta(self,theta_change):
-
-    def thetaHasntConverged(self, theta_change):
-
-
-
-
-
-
-
-
-    # Standardize the features
-
-    #
+    def standarizeData(self):
+        scaler = preprocessing.StandardScaler()
+        self.featureMatrix = scaler.fit_transform(self.featureMatrix)
